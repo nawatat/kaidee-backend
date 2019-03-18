@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, jsonify
-from models import db, Product
+from models import db, Product, User
 
 
 
@@ -21,7 +21,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 #   init app to sqlAchemy
-db.init_app(app)
+with app.app_context():
+    db.init_app(app)
 
 #
 #   API
@@ -31,7 +32,7 @@ db.init_app(app)
 def hello():
     return "Hello World!"
 
-@app.route("/product/getall")
+@app.route("/product/getall", methods=['GET'] )
 def getAllProduct():
     try:
         products = Product.query.all()
@@ -39,25 +40,27 @@ def getAllProduct():
     except Exception as e:
 	    return(str(e))
 
-@app.route("/product/getById/<product_id>")
+@app.route("/product/getById/<product_id>", methods=['GET'] )
 def getAllProductById( product_id ):
     '''
     '''
 
     pass
 
+@app.route("/product/create", methods=['POST'] )
 def createProduct():
     '''
     '''
-
     pass
 
-def editProduct():
+@app.route("/product/edit/<product_id>", methods=['PUT'] )
+def editProduct(product_id):
     '''
     '''
 
     pass
 
+@app.route("/product/delete/<product_id>", methods=['DELETE'] )
 def deleteProduct():
     '''
     '''
