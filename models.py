@@ -11,7 +11,7 @@ class User(db.Model):
     password_hash = db.Column( db.String(128) )
     firstname = db.Column( db.String(120) )
     lastname = db.Column( db.String(120) )
-    products = db.relationship('Product', backref='owner', lazy='dynamic')
+    products = db.relationship('Product', backref='seller', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -32,7 +32,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_name = db.Column(db.String(150))
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    price = db.Column(db.Numeric())
+    price = db.Column(db.Float())
     place = db.Column(db.String(100))
     description = db.Column(db.String(500))
     create_date = db.Column(db.DateTime())
@@ -45,7 +45,7 @@ class Product(db.Model):
         return {
             'id': self.id, 
             'product_name': self.product_name,
-            'seller_id' : self.seller_id,
+            'seller' : self.seller.serialize(),
             'price' : self.price,
             'place' : self.place,
             'description' : self.description,
