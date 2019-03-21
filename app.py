@@ -1,42 +1,48 @@
 import os
 import datetime
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, Blueprint
 from models import db, Product, User
 
+bp = Blueprint('api', __name__,)
 
+def create_app():
 
-app = Flask(__name__)
+    app = Flask(__name__)
+    
+    #   config to connect database
+    POSTGRES = {
+        'user': 'postgres',
+        'pw': '2484',
+        'db': 'kaidee_store',
+        'host': 'localhost',
+        'port': '5432',
+    }
 
-#   config to connect database
-POSTGRES = {
-    'user': 'postgres',
-    'pw': '2484',
-    'db': 'kaidee_store',
-    'host': 'localhost',
-    'port': '5432',
-}
+    app.config['DEBUG'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JSON_AS_ASCII'] = False  
 
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
-%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSON_AS_ASCII'] = False
-
-#   init app to sqlAchemy
-with app.app_context():
+    app.app_context().push()
     db.init_app(app)
+
+    app.register_blueprint(bp)
+
+    return app
+
+
 
 #
 #   API
 #
 
-
-@app.route("/products", methods=['GET'] )
+@bp.route("/products", methods=['GET'] )
 def getAllProduct():
     ''' Function to get all product
         Method : Get
     '''
 
+    
     #   Get all product
     try:
         products = Product.query.order_by( Product.id ).all()
@@ -46,7 +52,7 @@ def getAllProduct():
     except Exception as e:
 	    return make_response( str(e), 500 )
 
-@app.route("/products/<int:product_id>", methods=['GET'] )
+@bp.route("/products/<int:product_id>", methods=['GET'] )
 def getProductById( product_id ):
     ''' Function to get a product by product id
         Method : Get
@@ -65,7 +71,7 @@ def getProductById( product_id ):
         return make_response( str(e), 500 )
 
 
-@app.route("/products", methods=['POST'] )
+@bp.route("/products", methods=['POST'] )
 def createProduct():
     ''' Function to create a new product model
         Method : Post
@@ -94,7 +100,7 @@ def createProduct():
     except Exception as e:
         return make_response( str(e), 500 )
 
-@app.route("/products/<int:product_id>", methods=['PUT'] )
+@bp.route("/products/<int:product_id>", methods=['PUT'] )
 def editProduct( product_id ):
     ''' Function to update product
         Method : Put
@@ -127,7 +133,7 @@ def editProduct( product_id ):
         return make_response( str(e), 500 )
 
 
-@app.route("/products/<int:product_id>", methods=['DELETE'] )
+@bp.route("/products/<int:product_id>", methods=['DELETE'] )
 def deleteProduct( product_id ):
     ''' Function to delete product
         Method : Delete
@@ -148,7 +154,7 @@ def deleteProduct( product_id ):
     except Exception as e:
         return make_response( str(e), 500 )
 
-@app.route("/users", methods=['POST'] )
+@bp.route("/users", methods=['POST'] )
 def createUser( ):
     ''' Functino to create user
         Method : Post
@@ -182,4 +188,5 @@ def createUser( ):
         return make_response( str(e), 500 )
         
 if __name__ == '__main__':
+    app = create_app()
     app.run()
